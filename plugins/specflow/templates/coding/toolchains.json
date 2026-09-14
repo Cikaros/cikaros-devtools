@@ -1,0 +1,183 @@
+{
+  "version": 1,
+  "comment": "cikaros-devtools 语言-工具链衔接配置（v0.9.0）。hook 检测到项目语言时自动关联对应工具链；检测到工具链命令/文件时反向提示语言规则。语言与工具链是一体的——开发 Java 项目必然需要 Java 工具链。",
+  "toolchains": [
+    {
+      "name": "java-jdk",
+      "languages": ["java", "kotlin"],
+      "displayName": "Java JDK",
+      "detect": {
+        "files": ["pom.xml", "build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts", ".java-version", ".sdkmanrc"],
+        "commands": ["java", "javac", "mvn", "gradle", "gradlew", "kotlinc", "kotlin"]
+      },
+      "build": {
+        "maven": { "command": "mvn", "build": "mvn package", "test": "mvn test", "lint": "mvn checkstyle:check", "clean": "mvn clean" },
+        "gradle": { "command": "./gradlew", "build": "./gradlew build", "test": "./gradlew test", "lint": "./gradlew detekt", "clean": "./gradlew clean" }
+      },
+      "commonErrors": [
+        { "pattern": "Could not resolve dependencies", "cause": "Maven 仓库无法访问或依赖版本不存在", "fix": "检查 ~/.m2/settings.xml 的 mirror 配置；mvn dependency:tree 排查版本" },
+        { "pattern": "unsupported class file version", "cause": "编译时 JDK 版本高于运行时", "fix": "pom.xml 配置 maven-compiler-plugin source/target；或升级运行时 JDK" },
+        { "pattern": "SLF4J: Class path contains multiple SLF4J bindings", "cause": "依赖冲突引入多个 SLF4J 实现", "fix": "mvn dependency:tree | grep slf4j；exclude 多余绑定" }
+      ]
+    },
+    {
+      "name": "node-js",
+      "languages": ["javascript", "typescript"],
+      "displayName": "Node.js / JavaScript",
+      "detect": {
+        "files": ["package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lockb", "tsconfig.json", ".nvmrc", ".node-version"],
+        "commands": ["node", "npm", "pnpm", "yarn", "bun", "deno", "tsc", "tsx", "vitest", "jest"]
+      },
+      "build": {
+        "npm": { "command": "npm", "install": "npm ci", "build": "npm run build", "test": "npm test", "lint": "npm run lint" },
+        "pnpm": { "command": "pnpm", "install": "pnpm install --frozen-lockfile", "build": "pnpm build", "test": "pnpm test", "lint": "pnpm lint" },
+        "bun": { "command": "bun", "install": "bun install", "build": "bun run build", "test": "bun test", "lint": "bun run lint" }
+      },
+      "commonErrors": [
+        { "pattern": "EADDRINUSE", "cause": "端口被占用", "fix": "lsof -i :PORT 找进程；kill PID 或换端口" },
+        { "pattern": "Cannot find module", "cause": "依赖未安装或路径错误", "fix": "npm ci 重新安装；检查 import 路径大小写（macOS 默认不敏感）" },
+        { "pattern": "ERR_OSSL_EVP_UNSUPPORTED", "cause": "Node 17+ 与旧版 webpack 的 OpenSSL 不兼容", "fix": "NODE_OPTIONS=--openssl-legacy-provider npm run build" }
+      ]
+    },
+    {
+      "name": "rust-cargo",
+      "languages": ["rust"],
+      "displayName": "Rust / Cargo",
+      "detect": {
+        "files": ["Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "rust-toolchain"],
+        "commands": ["cargo", "rustc", "rustup", "cargo-nextest", "cargo-deny", "cargo-audit"]
+      },
+      "build": {
+        "cargo": { "command": "cargo", "build": "cargo build --release", "test": "cargo test", "lint": "cargo clippy -- -D warnings", "fmt": "cargo fmt --check", "doc": "cargo doc --no-deps" }
+      },
+      "commonErrors": [
+        { "pattern": "cannot borrow .* as mutable", "cause": "违反借用规则", "fix": "检查同一作用域内是否有其他借用；用 clone 或重构数据所有权" },
+        { "pattern": "cannot find .* in this scope", "cause": "use 引入缺失或路径错误", "fix": "检查 use 语句；cargo doc 查准确路径" },
+        { "pattern": "the trait .* is not implemented", "cause": "类型未实现 trait", "fix": "impl Trait for Type；或检查是否漏 feature flag" }
+      ]
+    },
+    {
+      "name": "go-toolchain",
+      "languages": ["go"],
+      "displayName": "Go",
+      "detect": {
+        "files": ["go.mod", "go.sum", ".go-version"],
+        "commands": ["go", "gofmt", "golangci-lint", "govulncheck", "goimports"]
+      },
+      "build": {
+        "go": { "command": "go", "build": "go build ./...", "test": "go test ./...", "lint": "golangci-lint run", "fmt": "gofmt -l .", "vet": "go vet ./..." }
+      },
+      "commonErrors": [
+        { "pattern": "cannot find module", "cause": "go mod tidy 未运行或 GOPROXY 配置错误", "fix": "go mod tidy；检查 GOPROXY=goproxy.cn（国内）" },
+        { "pattern": "package .* is not in std", "cause": "import 路径错误或未 go get", "fix": "go get <pkg>@version；检查 import 是否是完整 module path" }
+      ]
+    },
+    {
+      "name": "python-pip",
+      "languages": ["python"],
+      "displayName": "Python / pip",
+      "detect": {
+        "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile", "Pipfile.lock", "poetry.lock", ".python-version", "uv.lock"],
+        "commands": ["python", "python3", "pip", "pip3", "poetry", "uv", "pipenv", "ruff", "black", "mypy", "pytest"]
+      },
+      "build": {
+        "pip": { "command": "pip", "install": "pip install -r requirements.txt", "test": "pytest", "lint": "ruff check .", "fmt": "black ." },
+        "poetry": { "command": "poetry", "install": "poetry install", "test": "poetry run pytest", "lint": "poetry run ruff check .", "build": "poetry build" },
+        "uv": { "command": "uv", "install": "uv sync", "test": "uv run pytest", "lint": "uv run ruff check .", "build": "uv build" }
+      },
+      "commonErrors": [
+        { "pattern": "ModuleNotFoundError", "cause": "依赖未安装或虚拟环境未激活", "fix": "pip install -r requirements.txt；或 source venv/bin/activate" },
+        { "pattern": "SyntaxError: invalid syntax", "cause": "Python 版本不匹配（如 match-case 需 3.10+）", "fix": "python --version 检查；pyenv install 3.10+ 或 uv python pin 3.10" },
+        { "pattern": "ImportError: cannot import name", "cause": "循环 import 或版本不兼容", "fix": "检查模块依赖图；pip show <pkg> 查版本" }
+      ]
+    },
+    {
+      "name": "c-cpp-toolchain",
+      "languages": ["c", "cpp"],
+      "displayName": "C/C++ Toolchain",
+      "detect": {
+        "files": ["CMakeLists.txt", "Makefile", "makefile", "configure", "meson.build", "vcpkg.json", "conanfile.txt", "conanfile.py", ".clang-format", ".clang-tidy"],
+        "commands": ["gcc", "g++", "clang", "clang++", "cmake", "make", "ninja", "meson", "vcpkg", "conan", "ccache"]
+      },
+      "build": {
+        "cmake": { "command": "cmake", "configure": "cmake -B build -S .", "build": "cmake --build build", "test": "ctest --test-dir build", "lint": "clang-tidy build/**/*.cpp" },
+        "make": { "command": "make", "build": "make", "test": "make test", "clean": "make clean" }
+      },
+      "commonErrors": [
+        { "pattern": "undefined reference to", "cause": "链接阶段缺少符号", "fix": "检查 target_link_libraries；CMake 用 find_package 找依赖" },
+        { "pattern": "No rule to make target", "cause": "Makefile 目标名错或源文件缺失", "fix": "make clean && make；检查 CMakeLists.txt 的 add_executable 路径" },
+        { "pattern": "fatal error: .*: No such file", "cause": "头文件路径未配置", "fix": "target_include_directories 添加路径；vcpkg install <pkg>" }
+      ]
+    },
+    {
+      "name": "dotnet",
+      "languages": ["csharp"],
+      "displayName": ".NET / C#",
+      "detect": {
+        "files": ["*.csproj", "*.sln", "global.json", "Directory.Build.props", "nuget.config", "*.fsproj"],
+        "commands": ["dotnet", "msbuild", "nuget"]
+      },
+      "build": {
+        "dotnet": { "command": "dotnet", "build": "dotnet build", "test": "dotnet test", "lint": "dotnet format --verify-no-changes", "publish": "dotnet publish -c Release" }
+      },
+      "commonErrors": [
+        { "pattern": "NU1605.*downgrade", "cause": "依赖版本降级冲突", "fix": "dotnet list package --include-transitive 找冲突源；明确版本" },
+        { "pattern": "CS.*Cannot implicitly convert", "cause": "类型不兼容", "fix": "显式 cast 或检查泛型约束" },
+        { "pattern": "MSB3027.*Could not copy", "cause": "文件被占用", "fix": "关闭占用进程；dotnet build --no-incremental" }
+      ]
+    },
+    {
+      "name": "zig-toolchain",
+      "languages": ["zig"],
+      "displayName": "Zig",
+      "detect": {
+        "files": ["build.zig", "build.zig.zon"],
+        "commands": ["zig"]
+      },
+      "build": {
+        "zig": { "command": "zig", "build": "zig build", "test": "zig build test", "fmt": "zig fmt --check .", "run": "zig build run" }
+      },
+      "commonErrors": [
+        { "pattern": "error: OutOfMemory", "cause": "分配器返回 null", "fix": "检查 allocator.alloc 后用 try 或 catch；用 ArenaAllocator 简化" },
+        { "pattern": "error: InvalidCharacter", "cause": "字符解析失败", "fix": "检查输入范围；用 std.fmt.parseInt 解析失败会返回此错误" },
+        { "pattern": "unable to infer error set", "cause": "递归函数需显式错误集", "fix": "显式声明 `!ReturnType`；或用 `anyerror` 兜底" }
+      ]
+    },
+    {
+      "name": "android-sdk",
+      "languages": ["kotlin", "java"],
+      "displayName": "Android SDK / ADB",
+      "detect": {
+        "files": ["AndroidManifest.xml", "build.gradle", "build.gradle.kts", "gradle.properties", "local.properties"],
+        "commands": ["adb", "emulator", "gradle", "gradlew", "sdkmanager"]
+      },
+      "build": {
+        "gradle": { "command": "./gradlew", "build": "./gradlew assembleDebug", "test": "./gradlew testDebug", "lint": "./gradlew lintDebug", "install": "adb install -r app/build/outputs/apk/debug/app-debug.apk" },
+        "adb": { "command": "adb", "devices": "adb devices", "logcat": "adb logcat -v threadtime *:E", "push": "adb push <local> /sdcard/", "shell": "adb shell" }
+      },
+      "commonErrors": [
+        { "pattern": "ADB server didn.t ACK", "cause": "adb 端口冲突或进程残留", "fix": "adb kill-server && adb start-server" },
+        { "pattern": "INSTALL_FAILED_UPDATE_INCOMPATIBLE", "cause": "签名不匹配", "fix": "adb uninstall <package> 后重装；或用相同签名 keystore" },
+        { "pattern": "Manifest merger failed", "cause": "依赖库的 minSdk 高于项目", "fix": "提升项目 minSdkVersion；或用 tools:replace 覆盖属性" }
+      ]
+    },
+    {
+      "name": "shell-toolchain",
+      "languages": ["shell", "powershell"],
+      "displayName": "Shell / PowerShell",
+      "detect": {
+        "files": ["*.sh", "*.bash", "*.ps1", "*.psm1", "shell.nix", ".shellcheckrc"],
+        "commands": ["bash", "sh", "zsh", "pwsh", "powershell", "shellcheck", "shfmt", "PSScriptAnalyzer"]
+      },
+      "build": {
+        "shellcheck": { "command": "shellcheck", "lint": "shellcheck -x script.sh" },
+        "shfmt": { "command": "shfmt", "fmt": "shfmt -i 2 -ci -w script.sh" },
+        "psscriptanalyzer": { "command": "Invoke-ScriptAnalyzer", "lint": "Invoke-ScriptAnalyzer -Path . -Recurse" }
+      },
+      "commonErrors": [
+        { "pattern": "syntax error near unexpected token", "cause": "Windows CRLF 行尾在 Linux 跑", "fix": "dos2unix script.sh；或 sed -i 's/\\r$//' script.sh" },
+        { "pattern": "command not found", "cause": "PATH 未配置或包未安装", "fix": "which <cmd> 检查；包管理器装包后重开 shell" }
+      ]
+    }
+  ]
+}

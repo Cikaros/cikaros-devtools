@@ -1,0 +1,36 @@
+{
+  "name": "cikaros-devtools",
+  "interface": {
+    "displayName": "Cikaros DevTools"
+  },
+  "plugins": [
+    {
+      "name": "specflow",
+      "displayName": "specflow",
+      "source": {
+        "source": "local",
+        "path": "./plugins/specflow"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow",
+      "description": "结构化文档驱动的 Codex 工程化工作流插件：真实生命周期 hooks + MCP 工具 + 阶段状态机 + 标记驱动。"
+    },
+    {
+      "name": "ai-sdlc",
+      "displayName": "ai-sdlc",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ai-sdlc"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development & Workflow",
+      "description": "AI-Native SDLC 插件：把 Anthropic《AI-Native SDLC playbook》翻译成可执行的 Codex 生命周期 hooks——按提交工件自动检测当前阶段（intent.md → spec.md → plan.md → diff → PR → incident），无需用户显式注入即可走完 6 阶段闭环。用户输入三分类分流（需求/ISSUE 走 SDLC、补充信息融入当前周期工件、临时任务排队不混淆）；自然语言即命令（SessionStart 注入意图→工具映射），18 份操作手册零操作自动注册（官方 /prompts:<name> 调用）；hook 层环境自检与跨平台脚本护栏；测试门禁与修复循环中断；MCP 会话隔离；共享状态跨进程锁并发安全。近期：v0.13.10 全流程模拟排错轮次（阶段检测瞬态缺陷修复：未提交 .gitignore 污染、提交后门禁跌落、守卫显示矛盾、悬空模板引用、排队提醒不列条目）；v0.13.11 plan 接受通道与生命周期记忆轮次（引号感知 Bash 词法——搜索模式内的 | > $ 不再误拦；每回合生命周期状态条 + 等待接受提醒——上下文压缩后 agent 不再丢失流程记忆；「接受」意图识别直达 accept_plan，MCP 工具未暴露时受控 CLI 回退 sdlc.sh accept 同锁同语义可审计）；v0.13.12 沙盒授权与 Playwright 受控环境轮次（三层联动让 agent 被沙盒拒时正确请求用户授权提权而非重试绕过；setup-playwright.mjs 受控安装——--check 只读探测、--install 三选项需 --yes 用户抉择凭证、本机 Chrome 通道零浏览器下载；被拒测试命令不计失败轮次）。；v0.13.13 审批等待通知轮次（Codex 审批弹窗 y/esc 出现在回合进行中——任务静默暂停而用户不知情：网络/端口命令放行时发 alert 级桌面通知把人叫回终端，在场窗口 120s 降噪（命令完成后刷新），SDLC_NOTIFY_APPROVAL=off 可整类关闭）。完整版本历史见插件 docs/changes/CHANGELOG.md。"
+    }
+  ]
+}

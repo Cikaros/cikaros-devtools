@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "sdlc-orchestrator": {
+      "command": "node",
+      "args": [
+        "-e",
+        "var f=require('fs'),p=require('path'),o=require('os'); function E(r){try{var x=p.join(p.resolve(String(r)),'mcp','sdlc-orchestrator','index.js');return f.existsSync(x)?x:null}catch(e){return null}} function H(){return p.resolve(process.env.CODEX_HOME||p.join(o.homedir(),'.codex'))} var t=null; if(process.env.SDLC_PLUGIN_ROOT)t=E(process.env.SDLC_PLUGIN_ROOT); if(!t){try{ var j=JSON.parse(f.readFileSync(p.join(process.cwd(),'.sdlc','mcp-launcher.json'),'utf8')); if(j&&j.plugin_root){var h=p.join(H(),'plugins'),r=p.resolve(String(j.plugin_root));if(r===h||r.indexOf(h+p.sep)===0)t=E(r)} }catch(e){}} if(!t){try{ var b=p.join(H(),'plugins'),s=f.readdirSync(b); for(var i=0;i<s.length&&!t;i++){ t=E(p.join(b,s[i])); if(!t){ try{ var d=f.readdirSync(p.join(b,s[i]),{withFileTypes:true}); for(var q=0;q<d.length;q++){ if(d[q].isDirectory()){ var c=E(p.join(b,s[i],d[q].name)); if(c){t=c;break} } } }catch(e){} } } }catch(e){}} if(!t)t=E(process.cwd()); if(!t){process.stderr.write('[ai-sdlc] MCP bootstrap: plugin root not found. Set SDLC_PLUGIN_ROOT or re-open the session so the SessionStart hook can write .sdlc/mcp-launcher.json.');process.exit(1)} if(process.env.SDLC_BOOTSTRAP_PROBE){process.stdout.write(t)}else{require(t)}"
+      ],
+      "cwd": ".",
+      "env": {
+        "AI_SDLC_NOTE": "v0.13.3 自定位 bootstrap：解析链 SDLC_PLUGIN_ROOT > .sdlc/mcp-launcher.json（SessionStart 写入）> CODEX_HOME/plugins 扫描 > cwd；会话项目目录取进程 cwd"
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "name": "specflow",
+  "version": "1.2.4",
+  "description": "结构化文档驱动的 Codex 工程化工作流插件：真实生命周期 hooks + MCP 工具 + 阶段状态机 + 标记驱动 + 隐私脱敏，零依赖离线运行。",
+  "author": {
+    "name": "Cikaros",
+    "url": "https://github.com/Cikaros"
+  },
+  "homepage": "https://github.com/Cikaros/cikaros-devtools#readme",
+  "repository": "https://github.com/Cikaros/cikaros-devtools",
+  "license": "MIT",
+  "keywords": [
+    "specflow",
+    "workflow",
+    "lifecycle-hooks",
+    "markdown-config",
+    "todo-markers",
+    "privacy",
+    "codex"
+  ],
+  "mcpServers": "./.mcp.json",
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "specflow",
+    "shortDescription": "结构化文档驱动的 Codex 工程化工作流",
+    "longDescription": "specflow 把 Codex CLI 从『会写代码的助手』升级为『可工程化的开发伙伴』：会话启动采用智能提示机制只注入资源索引（~1KB），具体内容按需注入；用户输入自动检测工作流阶段并加载对应规则、检测反模式直接警告（语言匹配过滤避免误报）、关联语言-工具链；工具调用前按 .codexignore 黑名单拦截；工具输出检测敏感信息并给出脱敏改写版本，同时匹配错误知识库（toolchains.json commonErrors + 项目本地 .specflow/error-kb/）注入修复方案；阶段推进做产出检查（缺失真实阻塞）并自动判定标记 resolved；git hooks 提供真实门禁（隐私命中阻塞 / 测试失败阻塞 / STRICT 标记阻塞）。支持 13 语言 × 5 文档模板 + 10 工具链配置，零依赖离线运行。",
+    "developerName": "Cikaros",
+    "category": "Development & Workflow",
+    "capabilities": [
+      "lifecycle-hooks",
+      "mcp-servers",
+      "stage-workflow",
+      "todo-markers",
+      "privacy-redaction",
+      "git-hooks",
+      "markdown-config"
+    ],
+    "websiteURL": "https://github.com/Cikaros/cikaros-devtools",
+    "defaultPrompt": [
+      "帮我初始化一个新项目的 specflow 工作流",
+      "扫描当前项目的 TODO/FIXME 标记",
+      "跑环境自检看 specflow 是否配置正确"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

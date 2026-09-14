@@ -1,0 +1,14 @@
+*.pem
+*.key
+.env
+.env.*
+!.env.example
+**/secrets/**
+**/node_modules/**
+**/dist/**
+**/__pycache__/**
+*.log
+.DS_Store
+!.codex/env-scan.json
+!.codex/todo-state.json
+!.codex/hooks-state.json

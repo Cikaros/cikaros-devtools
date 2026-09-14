@@ -1,0 +1,43 @@
+# specflow — MCP servers 配置片段（v1.2.4）
+#
+# ⚠ 本文件不再是「整体覆盖 ~/.codex/config.toml 的模板」——那是 v0.2.x 的危险行为
+#   （会清掉用户的 model / sandbox / 其他 MCP 配置），已废弃。
+#
+# 现在的正确安装方式（v1.3.0+ 起，两步流程）：
+#   1. 在仓库根目录注册 marketplace：
+#        bash scripts/sh/install.sh
+#      （只做 codex plugin marketplace add，幂等可重复执行）
+#   2. 在 codex 会话内通过 /plugins 启用 specflow：
+#        /plugins → 浏览 cikaros-devtools → 选 specflow → /hooks 信任
+#      MCP servers 由插件的 .mcp.json 声明（相对路径，Codex 负责解析），
+#      本文件不参与。
+#
+# ⚠ v0.2.x 中的 [hooks.session_start] 等 TOML 表是无效的自造格式：
+#   Codex 从不支持在 config.toml 里声明 hooks，真实机制是 hooks.json
+#   （事件名 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / Stop /
+#   SessionEnd）。插件模式用 hooks/hooks.json。详见 hooks/hooks.json 与
+#   docs/decisions/ADR-003。
+#
+# ⚠ v1.3.0 起 classic 模式（直接写 ~/.codex/hooks.json）已移除——
+#   安装/卸载脚本迁移至仓库根目录 scripts/，只做 marketplace 注册/移除。
+#   plugin 启用/停用由用户在 codex 会话内 /plugins 自行决定。
+
+# >>> specflow mcp_servers（参考片段；插件模式下由 .mcp.json 提供真实配置）>>>
+
+[mcp_servers.hook-orchestrator]
+command = "node"
+args = ["__CODEX_HOME__/mcp/hook-orchestrator/index.js"]
+
+[mcp_servers.config-reader]
+command = "node"
+args = ["__CODEX_HOME__/mcp/config-reader/index.js"]
+
+[mcp_servers.env-scanner]
+command = "node"
+args = ["__CODEX_HOME__/mcp/env-scanner/index.js"]
+
+[mcp_servers.privacy-guard]
+command = "node"
+args = ["__CODEX_HOME__/mcp/privacy-guard/index.js"]
+
+# <<< specflow mcp_servers <<<

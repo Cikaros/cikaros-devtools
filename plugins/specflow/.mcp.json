@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "hook-orchestrator": {
+      "command": "node",
+      "args": ["./mcp/hook-orchestrator/index.js"],
+      "cwd": ".",
+      "env": { "SPECFLOW_NOTE": "server 自定位插件根；会话项目目录取进程 cwd" }
+    },
+    "config-reader": {
+      "command": "node",
+      "args": ["./mcp/config-reader/index.js"],
+      "cwd": "."
+    },
+    "env-scanner": {
+      "command": "node",
+      "args": ["./mcp/env-scanner/index.js"],
+      "cwd": "."
+    },
+    "privacy-guard": {
+      "command": "node",
+      "args": ["./mcp/privacy-guard/index.js"],
+      "cwd": "."
+    }
+  }
+}

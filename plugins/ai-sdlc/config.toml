@@ -1,0 +1,14 @@
+# ai-sdlc 插件配置（Codex config.toml 兼容）
+#
+# v0.2.0+ 起：本文件仅作参考。安装流程改为两步：
+#   1. 仓库根目录 bash scripts/sh/install.sh 注册 marketplace
+#   2. codex 会话内 /plugins 启用 ai-sdlc
+#
+# 插件模式下 MCP servers 由 .mcp.json 声明（相对路径，Codex 负责解析）。
+# classic 模式（直接写 ~/.codex/config.toml）已移除。
+
+[mcp_servers.sdlc-orchestrator]
+command = "node"
+args = ["${PLUGIN_ROOT}/mcp/sdlc-orchestrator/index.js"]
+cwd = "${PLUGIN_ROOT}"
+env = { SDLC_NOTE = "server 自定位插件根；会话项目目录取进程 cwd" }

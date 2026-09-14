@@ -1,0 +1,10 @@
+{
+  "stages": ["req-analysis", "arch-design", "coding", "review", "testing"],
+  "anti-patterns": [],
+  "hooks": {},
+  "config-team": {
+    "strict-types": true,
+    "coverage_threshold": 80,
+    "require_adr": true
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "description": "ai-sdlc lifecycle hooks — Codex 原生 hooks.json。插件模式命令用 ${PLUGIN_ROOT}（Codex 注入）。设计目标：用户无需显式 slash 命令，按提交的工件自动驱动 6 阶段闭环。近期版本：；v0.13.6 代码组织轮次（common.mjs 拆为 12 个分层领域模块经桶导出、MCP server 拆为 server-state/context/tools/index 四件——行为零变更，全量回归通过）；v0.13.7 Codex 对齐轮次（SessionEnd 超时 10s→3s 对齐 Codex 硬上限，消除启动 clamping 警告）；v0.13.8 macOS 通知交互轮次（applet 自托管宿主免 Script Editor + afplay 声音必达 + 需决策专属音）v0.13.10 全流程模拟排错轮次（bootstrap 自建未提交 .gitignore 不再计入业务 diff——plan 落地后阶段误跳 test 致门禁失效已修；规则 2/3/4 并集阶段判定——提交后部署/修复门禁不失效；SessionStart 守卫显示一致性；悬空模板引用清理；Stop 排队提醒列出条目）。；v0.13.11 plan 接受通道与生命周期记忆轮次（Bash 门禁引号感知词法——引号内 | > $ 是搜索模式字面量不再误拦、引号包裹写目标真实提取；UserPromptSubmit 每回合注入生命周期状态条 + plan 等待接受提醒与接受意图识别——上下文压缩后 agent 不再丢失流程记忆；MCP 工具未暴露时受控 CLI 回退 sdlc.sh accept / accept-plan.mjs（规则 1b 精确豁免，同锁同语义可审计））；v0.13.12 沙盒授权与 Playwright 受控环境轮次（三层联动：PreToolUse 规则 0f 网络端口命令放行前注入授权应对协议（每会话去重）+ PostToolUse 拒绝证据检测（被拒测试命令不计失败轮次）+ UserPromptSubmit 1f 下回合授权提醒；setup-playwright.mjs 受控安装入口——--check 只读探测 plan 模式白名单豁免，--install full|chrome|skip 需 --yes 用户抉择凭证，本机 Chrome 通道零浏览器下载）；v0.13.13 审批等待通知轮次（PreToolUse 规则 0f 同判定点另发 approval-wait 桌面通知——Codex 审批弹窗 y/esc 出现在回合进行中，任务静默暂停而用户不知情；PostToolUse 在场窗口刷新 netport_last_exec_at，默认 120s 内静默；SDLC_NOTIFY_APPROVAL=off 可整类关闭）完整版本历史与设计决策见插件 docs/changes/CHANGELOG.md。",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/session-start.mjs\"",
+            "statusMessage": "ai-sdlc: 工件扫描 + 阶段自动检测 + 作用域路由 + 生命周期约定注入 + 环境画像自检（shell 能力探测）+ 手册自动注册（v0.13.2 零操作；v0.13.3 启动器指针；v0.13.4 路径规范化/证据门槛；v0.13.5 跨进程锁 + BOM 容错；v0.13.6 模块化重构）",
+            "timeout": 30,
+            "additionalContextLimit": 4000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/user-prompt-submit.mjs\"",
+            "statusMessage": "ai-sdlc: 阶段规则按需注入 + 缺失工件提示 + 反模式警告 + 输入分流提醒 + 队列状态（v0.13.0：生命周期/队列操作统一自然语言→MCP 工具，无 slash 命令；v0.13.5：hooks-state 锁内写；v0.13.6：模块化重构）",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/pre-tool-use.mjs\"",
+            "statusMessage": "ai-sdlc: 阶段门禁（plan 禁改代码/修复期禁改测试/未测试禁 push/PR/循环中断/状态文件保护）+ 跨平台脚本护栏（v0.13.9：sed -n 读形态放行、apply_patch heredoc 文档载荷放行、/dev/null 豁免——误报修复；v0.13.10：规则 2/3/4 并集阶段判定——提交后检测跌落窗口门禁不失效；v0.13.11：引号感知词法——引号内 | > $ 字面量不误拦、引号包裹写目标真实提取、受控接受 CLI 精确豁免；v0.13.12：规则 0f 网络端口命令沙盒授权预警（每会话去重）+ setup-playwright --check 只读探测豁免；v0.13.13：同判定点另发审批等待通知 approval-wait——alert 级桌面通知把用户叫回终端选 y/esc，在场窗口 120s 降噪）",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/post-tool-use.mjs\"",
+            "statusMessage": "ai-sdlc: 工件推进 + 测试记录（签名/轮次/循环检测）+ 归档闭环 + 沙盒拒绝证据（v0.13.12：被拒测试命令不计失败轮次；v0.13.13：网络/端口命令完成时刷新在场窗口 netport_last_exec_at——审批等待通知的降噪依据）",
+            "timeout": 15,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/stop.mjs\"",
+            "statusMessage": "ai-sdlc: 完成前检查（产出完整性/测试验证/提问与循环中断呈报）+ 回合结束系统通知（macOS v0.13.8：applet 宿主免 Script Editor + afplay 声音必达 + 需决策专属音；v0.13.10：有效阶段呈现 + 排队条目列出）",
+            "timeout": 20,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/session-end.mjs\"",
+            "timeout": 3,
+            "statusMessage": "ai-sdlc: 会话快照存档（工件永不删除；v0.13.7 超时对齐 Codex 3s 上限）"
+          }
+        ]
+      }
+    ]
+  }
+}

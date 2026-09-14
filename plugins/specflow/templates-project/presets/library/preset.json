@@ -1,0 +1,5 @@
+{
+  "stages": ["req-analysis", "arch-design", "coding", "review", "testing"],
+  "anti-patterns": [],
+  "hooks": {}
+}

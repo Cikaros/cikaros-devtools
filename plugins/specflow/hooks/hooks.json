@@ -1,0 +1,82 @@
+{
+  "description": "specflow lifecycle hooks — Codex 原生 hooks.json 格式（v0.3.0 起为唯一可执行事实源，hooks/manifest.md 保留为声明式文档）。插件模式命令用 ${PLUGIN_ROOT}（Codex 注入）。v1.3.0+ classic 模式已移除，plugin 启用由用户在 codex 会话内 /plugins 自行决定。",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/session-start.mjs\"",
+            "statusMessage": "specflow: 环境扫描 + 配置解析 + 标记扫描",
+            "timeout": 30,
+            "additionalContextLimit": 4000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/user-prompt-submit.mjs\"",
+            "statusMessage": "specflow: 阶段检测 + 规则注入",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/pre-tool-use.mjs\"",
+            "statusMessage": "specflow: .codexignore 黑名单检查",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/post-tool-use.mjs\"",
+            "statusMessage": "specflow: 输出脱敏 + 审计",
+            "timeout": 15,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/stop.mjs\"",
+            "statusMessage": "specflow: 刷新标记状态",
+            "timeout": 20,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/hooks/scripts/session-end.mjs\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ]
+  }
+}

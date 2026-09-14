@@ -1,0 +1,16 @@
+{
+  "stages": ["req-analysis", "arch-design", "coding", "review", "testing", "deploy"],
+  "anti-patterns": [
+    {"pattern": "console.log(", "lang": "typescript", "id": "no-console-log", "warn": "禁止 console.log；用 logger 或 debug 模块"},
+    {"pattern": "debugger;", "lang": "typescript", "id": "no-debugger", "warn": "禁止 debugger 语句"},
+    {"pattern": "var ", "lang": "typescript", "id": "no-var-in-ts", "warn": "TypeScript 用 let/const 而非 var"}
+  ],
+  "hooks": {
+    "pre-tool-use": [
+      {"id": "block-env-commit", "matcher": "bash", "pattern": "git commit.*\\.env$", "action": "deny", "reason": "禁止提交 .env 文件"}
+    ],
+    "post-tool-use": [
+      {"id": "detect-console-log", "matcher": "apply_patch|Edit|Write", "pattern": "console\\.log\\(", "severity": "warn", "message": "检测到 console.log 残留"}
+    ]
+  }
+}

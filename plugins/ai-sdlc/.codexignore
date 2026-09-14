@@ -1,0 +1,14 @@
+# .codexignore — ai-sdlc 插件自身忽略清单
+# 阻止 codex 读取插件内部不必要的文件
+
+# 归档与历史
+docs/archive/
+docs/changes/
+
+# 临时与缓存
+*.bak
+*.tmp
+node_modules/
+
+# MCP server 内部日志
+mcp/*.log

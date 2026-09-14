@@ -1,0 +1,17 @@
+{
+  "stages": ["req-analysis", "terraform-design", "apply", "drift-check"],
+  "anti-patterns": [
+    {"pattern": "terraform destroy", "lang": "shell", "id": "no-terraform-destroy", "warn": "禁止 terraform destroy；用 terraform plan -destroy 先审查"},
+    {"pattern": "kubectl apply.*--context=prod", "lang": "shell", "id": "warn-prod-deploy", "warn": "建议先在 staging 验证"}
+  ],
+  "hooks": {
+    "pre-tool-use": [
+      {"id": "block-terraform-destroy", "matcher": "bash", "pattern": "terraform destroy", "action": "deny", "reason": "禁止 terraform destroy"},
+      {"id": "block-prod-db", "matcher": "bash", "pattern": "mysql.*-h.*prod", "action": "deny", "reason": "禁止直连生产数据库"}
+    ]
+  },
+  "error-kb-config": {
+    "organization": "by-module",
+    "directories": ["network", "compute", "storage", "security"]
+  }
+}
